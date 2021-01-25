@@ -1,1 +1,2 @@
-# COMP 424: Artificial Intelligence ## McGill University
+# COMP 424: Artificial Intelligence 
+## McGill University
