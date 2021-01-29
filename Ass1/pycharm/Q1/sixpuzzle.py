@@ -51,7 +51,7 @@ def bfs(init_state):
         for n in neighbors:
             if n.map not in explored:
                 q.append(n)
-                explored.add(n.map)
+                #explored.add(n.map)
 
 
 # ----------------------------------------------
@@ -85,7 +85,7 @@ def ucs(init_state):
         for n in neighbors:
             if n.map not in explored:
                 q.put((n.cost, n))
-                explored.add(n.map)
+                #explored.add(n.map)
 
 
 # ----------------------------------------------
@@ -97,7 +97,7 @@ def dfs(init_state):
 
     explored = set()
     start_state = State(init_state, None, None, 0, 0, 0)
-    stack = list([start_state])
+    stack = [start_state]
 
     print("Start state:")
     print(start_state)
@@ -115,9 +115,9 @@ def dfs(init_state):
         neighbors.sort(key=lambda s: s.moved, reverse=True)
 
         for neighbor in neighbors:
-            if neighbor.map not in explored and neighbor not in stack:
+            if neighbor.map not in explored:
                 stack.append(neighbor)
-                explored.add(neighbor.map)
+                #explored.add(neighbor.map)
 
 
 # ----------------------------------------------
@@ -148,7 +148,7 @@ def dls(explored, stack, max_depth):
     for neighbor in neighbors:
         if neighbor.map not in explored and neighbor not in stack:
             stack.append(neighbor)
-            explored.add(neighbor.map)
+            #explored.add(neighbor.map)
             if dls(explored, stack, max_depth-1): # recursive dls
                 return True
 
