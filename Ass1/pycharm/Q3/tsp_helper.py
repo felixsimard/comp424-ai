@@ -5,14 +5,17 @@ class TSPResult:
         self.cost = cost
 
     def view(self):
-        return self.instance.view(result=None, nodes=True, edges=True, node_zorder=5, node_color='black', edge_color='grey')
+        return self.instance.view(result=None, nodes=True, edges=True, node_zorder=5, node_color='black',
+                                  edge_color='grey')
 
     def nodes(self):
         return self.instance.nodes_as_list
 
-def computeBruteForce(tsp_instance):
-    tsp_instance.solve(brute_force=True)
-    nodes = tsp_instance.results['brute_force']
+
+def computeTourCost(tsp_instance, solve=True, nodes=[]):
+    if solve:
+        tsp_instance.solve(brute_force=True)
+        nodes = tsp_instance.results['brute_force']
     cost = 0
     for i in range(len(nodes)):
         if i + 1 < len(nodes):
