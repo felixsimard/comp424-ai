@@ -68,8 +68,8 @@ def partB():
     # Find, if any, the number of tours where the random tour happens to be the optimal tour
     randomIsOptimal = 0
     for t in tsp_lst:
-        random_cost = round(t['random'])
-        optimal_cost = round(t['optimal'])
+        random_cost = t['random']
+        optimal_cost = t['optimal']
 
         if random_cost == optimal_cost:
             randomIsOptimal += 1
@@ -205,7 +205,7 @@ def partC():
                 lowest_cost = cost
                 best_path = n
 
-            if round(lowest_cost) == round(optimal_cost):
+            if lowest_cost == optimal_cost:
                 algo_found_optimal += 1
 
         # Add the best path for this iteration to our list to compute the metrics later on
@@ -251,6 +251,9 @@ def parseEdges(nodes):
 
 # Part D
 def partD():
+    global NUM_CITIES
+    NUM_CITIES = 100
+    # partB()
 
 
 # ----------------------
