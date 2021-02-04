@@ -51,8 +51,17 @@ def partA():
 def partB():
     tsp_lst = []
     for i in range(NUM_TSP_INSTANCES):
+
+        print("TSP Instance:", i)
+
         tsp = gen.new_instance(NUM_CITIES)
-        out = randomTour(tsp)
+        print("Created TSP instance")
+        if NUM_CITIES > 10:
+            out = randomTour(tsp, compute_costs=True, compute_optimal=False)
+        else:
+            out = randomTour(tsp, compute_costs=True, compute_optimal=True)
+
+        print("Generated random tour")
         tsp_lst.append(out)
 
     print("\nGenerated %s random instances of TSP, each containing %s cities." % (NUM_TSP_INSTANCES, NUM_CITIES))
@@ -83,7 +92,7 @@ def partB():
     print("Random happens to be optimal: %3d" % randomIsOptimal)
 
 
-def randomTour(tsp, compute_costs=True):
+def randomTour(tsp, compute_costs=True, compute_optimal=True):
     cost_random = 0
     cost_optimal = 0;
 
@@ -107,7 +116,8 @@ def randomTour(tsp, compute_costs=True):
     if compute_costs:
         # Compute cost of the random tour, and optimal tour
         cost_random = computeTourCost(tsp, solve=False, nodes=rest)
-        cost_optimal = computeTourCost(tsp, solve=True)
+        if compute_optimal:
+            cost_optimal = computeTourCost(tsp, solve=True)
 
     return {'random_tour': rest, 'random': cost_random, 'optimal': cost_optimal}
 
@@ -116,10 +126,20 @@ def randomTour(tsp, compute_costs=True):
 def partC():
     tsp_lst = []  # to hold all the costs found by the algorithm
     algo_found_optimal = 0
+    optimal_cost = 0
 
     for i in range(NUM_TSP_INSTANCES):
+
+        print("TSP Instance:", i)
+
         tsp = gen.new_instance(NUM_CITIES)
-        random = randomTour(tsp, compute_costs=True)
+
+        if NUM_CITIES > 10:
+            random = randomTour(tsp, compute_costs=True, compute_optimal=False)
+        else:
+            random = randomTour(tsp, compute_costs=True, compute_optimal=True)
+
+        print("Generated random tour")
         random_tour = random['random_tour']
 
         # print("Random tour:", random_tour)
@@ -187,6 +207,8 @@ def partC():
             # Add it to our list of possible paths found by the algorithm
             neighbour_paths.append(neighbour_p)
 
+        print("Iterated over all 2-change neighbours")
+
         # print("Generated", len(neighbour_paths), "possible neighbours using 2-change neighbourhood function.")
         # tsp.view(result=None, nodes=True, edges=True)
 
@@ -196,8 +218,11 @@ def partC():
 
         lowest_cost = computeTourCost(tsp, solve=False, nodes=neighbour_paths[0])
         best_path = neighbour_paths[0]
-        optimal_cost = computeTourCost(tsp, solve=True)
 
+        if NUM_CITIES <= 10:
+            optimal_cost = computeTourCost(tsp, solve=True)
+
+        print("Hill-climbing over neighbours")
         for n in neighbour_paths:
             cost = computeTourCost(tsp, solve=False, nodes=n)
             tsp_lst
@@ -215,6 +240,8 @@ def partC():
         # print("Optimal:", optimal_cost)
         # print("Algo:", lowest_cost, best_path)
         # print("Optimal cost found:", algo_found_optimal)
+
+        print("\n")
 
     # Compute metrics
     list_of_tour_costs = [tsp['cost'] for tsp in tsp_lst]
@@ -253,7 +280,8 @@ def parseEdges(nodes):
 def partD():
     global NUM_CITIES
     NUM_CITIES = 100
-    # partB()
+    partB()
+    # partC()
 
 
 # ----------------------
