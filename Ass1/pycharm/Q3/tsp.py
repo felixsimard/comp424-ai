@@ -130,7 +130,7 @@ def partC():
 
     for i in range(NUM_TSP_INSTANCES):
 
-        print("TSP Instance:", i)
+        print("\nTSP Instance:", i)
 
         tsp = gen.new_instance(NUM_CITIES)
 
@@ -138,26 +138,54 @@ def partC():
             random = randomTour(tsp, compute_costs=True, compute_optimal=False)
         else:
             random = randomTour(tsp, compute_costs=True, compute_optimal=True)
+            optimal_cost = computeTourCost(tsp, solve=True)
 
         print("Generated random tour")
         random_tour = random['random_tour']
 
-        # print("Random tour:", random_tour)
+        min_tour = hill_climbing(tsp, random_tour)
+        cost = computeTourCost(tsp, solve=False, nodes=min_tour)
+
+        if cost == optimal_cost:
+            algo_found_optimal += 1
+
+        # Add the best path for this iteration to our list to compute the metrics later on
+        tsp_lst.append({'path': min_tour, 'cost': cost})
+
+    # Compute metrics
+    list_of_tour_costs = [tsp['cost'] for tsp in tsp_lst]
+    mean = np.mean(list_of_tour_costs)
+    min = np.min(list_of_tour_costs)
+    max = np.max(list_of_tour_costs)
+    std = np.std(list_of_tour_costs)
+
+    # Show metrics
+    print("\n")
+    print("Avg: %8.3f" % mean)
+    print("Min: %8.3f" % min)
+    print("Max: %8.3f" % max)
+    print("Std: %8.3f" % std)
+    print("-----------------")
+    print("Algo found the optimal solution %3d time(s)" % algo_found_optimal)
+
+
+def hill_climbing(tsp, random_tour):
+
+    while True:
+
+        lowest_cost = computeTourCost(tsp, solve=False, nodes=random_tour)
 
         # Construct list of edges to manipulate them in the 2-change neighbourhood function
         random_edges = parseEdges(random_tour)
 
         # Generate list of all 2-change edge combinations
-        all_2_change_combinations = list(itertools.combinations(random_edges, 2))
-
-        # print("Edges:", random_edges)
-        # print("Comb:", all_2_change_combinations, "\n")
+        all_2_change_combinations = list(itertools.combinations(random_edges[1:-1], 2))
 
         neighbour_paths = []
         for edges_comb in all_2_change_combinations:  # this runs (n choose 2) times at each iteration
 
+            # extract edges from node list
             neighbour = parseEdges(random_tour)
-            # print("Initial path:", neighbour)
 
             # parse the 2 edges picked at this iteration
             edge1, edge2 = edges_comb
@@ -166,8 +194,6 @@ def partC():
             # original list of combinations)
             edge1_cpy = edge1.copy()
             edge2_cpy = edge2.copy()
-
-            # print("Edges before:", edge1_cpy, edge2_cpy)
 
             # save the indeces of the edges to be changed from the original edge list
             edge1_ind = neighbour.index(edge1_cpy)
@@ -178,13 +204,9 @@ def partC():
             edge1_cpy[1] = edge2_cpy[1]
             edge2_cpy[1] = temp
 
-            # print("Edges after:", edge1_cpy, edge2_cpy)
-
             # assign the swapped edges to their correct position
             neighbour[edge1_ind] = edge1_cpy
             neighbour[edge2_ind] = edge2_cpy
-
-            # print("2-change:", neighbour)
 
             # now re-construct the modified random tour node path sequence
             neighbour_p = []
@@ -202,12 +224,10 @@ def partC():
             # and now just return to start node
             neighbour_p.append(neighbour_p[0])
 
-            # print("Neighbour path:", neighbour_p, "\n")
-
             # Add it to our list of possible paths found by the algorithm
             neighbour_paths.append(neighbour_p)
 
-        print("Iterated over all 2-change neighbours")
+        # print("Iterated over all 2-change neighbours")
 
         # print("Generated", len(neighbour_paths), "possible neighbours using 2-change neighbourhood function.")
         # tsp.view(result=None, nodes=True, edges=True)
@@ -216,48 +236,22 @@ def partC():
         # At this point, we have all the possible paths, derived from the 2-change neighbourhood function
         # Perform our greedy local search
 
-        lowest_cost = computeTourCost(tsp, solve=False, nodes=neighbour_paths[0])
-        best_path = neighbour_paths[0]
+        # print("Hill-climbing over neighbours")
+        # print("Neighbours:", len(neighbour_paths))
+        min_tour = []
+        min_tour_cost = lowest_cost
+        for n in neighbour_paths: # iterate over all 2-change neighbours
 
-        if NUM_CITIES <= 10:
-            optimal_cost = computeTourCost(tsp, solve=True)
+            new_cost = computeTourCost(tsp, solve=False, nodes=n)
+            if new_cost < min_tour_cost:
+                min_tour_cost = new_cost
+                min_tour = n
 
-        print("Hill-climbing over neighbours")
-        for n in neighbour_paths:
-            cost = computeTourCost(tsp, solve=False, nodes=n)
-            tsp_lst
-            if cost < lowest_cost:
-                lowest_cost = cost
-                best_path = n
-
-            if lowest_cost == optimal_cost:
-                algo_found_optimal += 1
-
-        # Add the best path for this iteration to our list to compute the metrics later on
-        tsp_lst.append({'path': best_path, 'cost': lowest_cost})
-
-        # print("")
-        # print("Optimal:", optimal_cost)
-        # print("Algo:", lowest_cost, best_path)
-        # print("Optimal cost found:", algo_found_optimal)
-
-        print("\n")
-
-    # Compute metrics
-    list_of_tour_costs = [tsp['cost'] for tsp in tsp_lst]
-    mean = np.mean(list_of_tour_costs)
-    min = np.min(list_of_tour_costs)
-    max = np.max(list_of_tour_costs)
-    std = np.std(list_of_tour_costs)
-
-    # Show metrics
-    print("Avg: %8.3f" % mean)
-    print("Min: %8.3f" % min)
-    print("Max: %8.3f" % max)
-    print("Std: %8.3f" % std)
-    print("-----------------")
-    print("Algo found the optimal solution %3d time(s)" % algo_found_optimal)
-
+        if lowest_cost <= min_tour_cost:
+            return random_tour
+        else:
+            print("Found lower cost:", min_tour_cost)
+            random_tour = min_tour
 
 
 def findNextNodeIndex(neighbour, dest):
@@ -279,9 +273,9 @@ def parseEdges(nodes):
 # Part D
 def partD():
     global NUM_CITIES
-    NUM_CITIES = 100
-    partB()
-    # partC()
+    NUM_CITIES = 6
+    # partB()
+    partC()
 
 
 # ----------------------
