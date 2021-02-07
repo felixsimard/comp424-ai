@@ -273,9 +273,9 @@ def parseEdges(nodes):
 # Part D
 def partD():
     global NUM_CITIES
-    NUM_CITIES = 6
-    # partB()
-    partC()
+    NUM_CITIES = 100
+    partB()
+    # partC()
 
 
 # ----------------------
